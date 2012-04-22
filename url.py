@@ -7,8 +7,9 @@ returns a code.
 requests to host/o/code
 redirects to http://site/
 """
-import sqlite3
-import os.path
+import memcache
+import string
+import random
 
 
 def application(env, start_response):
@@ -17,39 +18,29 @@ def application(env, start_response):
     """
     # get input
     request = env['REQUEST_URI']
-    # check to make sure db is there again
-    if not os.path.exists(env['DOCUMENT_ROOT']+'/url.db'):
-        makeDB(env)
-    # open sqlite3
-    conn = sqlite3.connect(env['DOCUMENT_ROOT']+'/url.db')
-    c = conn.cursor()
+    mc = memcache.Client(['127.0.0.1:11211'])
     # if inputing
     if '/i/' in request:
-        # See if it's already there
-        c.execute('select code from url where url=?;',[request[3:]])
-        row = c.fetchone()
-        # if not put it there
-        if row == None:
-            c.execute('insert into url(url) values(?);',[request[3:]]) 
-            conn.commit()
-            c.execute('select code from url where url=?;',[request[3:]])
-            row = c.fetchone()
-        conn.close()
+        # generate code
+        char_set = string.letters+string.digits
+        code = ''.join(random.sample(char_set,4))
+        # make sure imput happened
+        if not mc.set(code,request[3:]):
+            start_response('200 OK', [('Content-Type','text/plain')])
+            return 'error'
         # send back code
         start_response('200 OK', [('Content-Type','text/plain')])
-        return getURLBase(env)+'/o/'+str(row[0])
+        return getURLBase(env)+'/o/'+code
     
     # if getting
     elif '/o/' in request:
-        c.execute('select url from url where code=?;',[request[3:]])
-        row = c.fetchone()
-        conn.close()
-        # if we don't have a code for it
-        if row == None:
+        code = mc.get(request[3:])
+        # no code
+        if code == None:
             start_response('200 OK', [('Content-Type','text/html')])
             return '<h1>URL Not Found</h1>'
         # we do have a code for it
-        start_response('301 Moved Permanently', [('Location',str(row[0]))])
+        start_response('301 Moved Permanently', [('Location',code)])
         return 0
 
     # something weird happened
@@ -65,13 +56,3 @@ def getURLBase(env):
         return env['UWSGI_SCHEME']+'://'+env['SERVER_NAME']
     else:
         return env['UWSGI_SCHEME']+'://'+env['SERVER_NAME']+':'+env['SERVER_PORT']
-
-def makeDB(env):
-    """
-    Sets up db
-    """
-    conn = sqlite3.connect(env['DOCUMENT_ROOT']+'/url.db')
-    c = conn.cursor()
-    c.execute('create table if not exists url(code integer primary key autoincrement, url varchar(200));')
-    conn.commit()
-    conn.close()
