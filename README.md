@@ -34,7 +34,7 @@ This is a simple project. There are no restrictions on what is put into the data
 
 Your database may fill up and make things slower. This probably isn't real efficient. You can always just have a cron job remove the database though, as it will be automatically created.
 
-I tried to account for different server address/ports/etc but I didn't actaully test it so your mileage may vary.
+I tried to account for different server addresss/ports/etc but I didn't actually test it so your mileage may vary.
 
 Bottom Line, there's probably better stuff out there for you to use. If you want to change something or make it better, fork me.
 
