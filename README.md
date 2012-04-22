@@ -11,28 +11,36 @@ This will probably run on anything that will run uwsgi, but my particular setup 
 
 I have included some configs to get you going.
 
-If you are on ubuntu, install the uwsgi-python, python-sqlite, and nginx packages, then put nginx.conf at /etc/nginx/sites-enabled/default and url.ini at /etc/uwsgi/apps-enabled/url.ini.
+If you are on ubuntu, install the uwsgi-python, python-memcache, memcached, and nginx packages, then put nginx.conf at /etc/nginx/sites-enabled/default and url.ini at /etc/uwsgi/apps-enabled/url.ini.
 
-I placed url.py at /var/www/url/url.py, but you can put it where ever you want as long as you modify your nginx and uwsgi config to point to that spot.
+I placed url.py at /var/www/url/url.py, but you can put it where ever you want as long as you modify your uwsgi config to point to that spot.
 
-The script will create a sqlite3 database on the first request in the directory defined by root in your nginx.conf, so your uwsgi will need write permissions there (www-data on ubuntu.)
+There are two different modes you can use. If you can use the whole domain (to save space) you submit urls to /in/.
+Otherwise submit them to /i/ and get them out as /o/. See Usage for more details.
+
+A previous version used sqlite3 instead of memcached. To use this version download this repo and run git checkout a3616b32c647eb9c3ffe08933f1f0a9f160d0e37 .
 
 #Usage#
 
 Once you get it up and going, the usage is simple.
 
 Requests to http(s)://yoursite.com/i/url
-will return a plain text url of the form http(s)://yoursite.com/o/code, where code is some number.
+will return a plain text url of the form http(s)://yoursite.com/o/code, where code is 4 random characters.
+
+Requests to http(s)://yoursite.com/in/url
+will return a plain text url of the form http(s)://yoursite.com/code, where code is 4 random characters.
 
 For example a request to http://yoursite.com/i/http://google.com/
-would return the text http://yoursite.com/o/5.
+would return the text http://yoursite.com/o/aZ2b.
+Going to that URL would redirect you to http://google.com/.
+
+Another example is a request to http://yoursite.com/in/http://google.com/
+would return the text http://yoursite.com/aBg4.
 Going to that URL would redirect you to http://google.com/.
 
 #Caveats#
 
-This is a simple project. There are no restrictions on what is put into the database (basic anti-sql injection is done though.)
-
-Your database may fill up and make things slower. This probably isn't real efficient. You can always just have a cron job remove the database though, as it will be automatically created.
+This is a simple project. There are no restrictions on what is put into memcached. 
 
 I tried to account for different server addresss/ports/etc but I didn't actually test it so your mileage may vary.
 

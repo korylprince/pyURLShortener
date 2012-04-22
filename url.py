@@ -19,7 +19,7 @@ def application(env, start_response):
     # get input
     request = env['REQUEST_URI']
     mc = memcache.Client(['127.0.0.1:11211'])
-    # if inputing
+    # if putting with subfolder
     if '/i/' in request:
         # generate code
         char_set = string.letters+string.digits
@@ -31,8 +31,21 @@ def application(env, start_response):
         # send back code
         start_response('200 OK', [('Content-Type','text/plain')])
         return getURLBase(env)+'/o/'+code
+
+    # if putting no subfolder
+    elif '/in/' in request:
+        # generate code
+        char_set = string.letters+string.digits
+        code = ''.join(random.sample(char_set,4))
+        # make sure imput happened
+        if not mc.set(code,request[3:]):
+            start_response('200 OK', [('Content-Type','text/plain')])
+            return 'error'
+        # send back code
+        start_response('200 OK', [('Content-Type','text/plain')])
+        return getURLBase(env)+'/'+code
     
-    # if getting
+    # if getting subfolder
     elif '/o/' in request:
         code = mc.get(request[3:])
         # no code
@@ -43,10 +56,16 @@ def application(env, start_response):
         start_response('301 Moved Permanently', [('Location',code)])
         return 0
 
-    # something weird happened
+    # if getting no subfolder
     else:
-        start_response('200 OK', [('Content-Type','text/html')])
-        return '<h1>Error</h1>'
+        code = mc.get(request)
+        # no code
+        if code == None:
+            start_response('200 OK', [('Content-Type','text/html')])
+            return '<h1>URL Not Found</h1>'
+        # we do have a code for it
+        start_response('301 Moved Permanently', [('Location',code)])
+        return 0
 
 def getURLBase(env):
     """
