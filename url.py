@@ -38,7 +38,7 @@ def application(env, start_response):
         char_set = string.letters+string.digits
         code = ''.join(random.sample(char_set,4))
         # make sure imput happened
-        if not mc.set(code,request[3:]):
+        if not mc.set(code,request[4:]):
             start_response('200 OK', [('Content-Type','text/plain')])
             return 'error'
         # send back code
@@ -58,7 +58,7 @@ def application(env, start_response):
 
     # if getting no subfolder
     else:
-        code = mc.get(request)
+        code = mc.get(request[1:])
         # no code
         if code == None:
             start_response('200 OK', [('Content-Type','text/html')])
