@@ -23,7 +23,7 @@ def application(env, start_response):
     if '/i/' in request:
         # generate code
         char_set = string.letters+string.digits
-        code = ''.join(random.sample(char_set,4))
+        code = ''.join(random.sample(char_set,6))
         # make sure imput happened
         if not mc.set(code,request[3:]):
             start_response('200 OK', [('Content-Type','text/plain')])
