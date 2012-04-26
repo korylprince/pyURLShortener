@@ -58,5 +58,5 @@ Bottom Line, there's probably better stuff out there for you to use. If you want
 
 #License#
 
-Code is Copyright 2012 Kory Prince <korylprince at gmail dot com>
+Code is Copyright 2012 Kory Prince (korylprince at gmail dot com)
 This code is Public Domain. There is no warranty. Do whatever you want. It'd be nice if you sent me an email telling me someone used it though.
