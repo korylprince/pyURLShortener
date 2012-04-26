@@ -102,11 +102,13 @@ def getURL(code, env):
 
 
     # check if row in database
-    c.execute('select url from url where code=?;',[code])
+    c.execute('select url,code from url where code=?;',[code])
     row = c.fetchone()
 
     # check if there was a row
     if row != None:
+        # add it back to memcached
+        mc.set(row[1].encode('ascii'),row[0].encode('ascii'))
         return row[0]
 
     # nothing was found
