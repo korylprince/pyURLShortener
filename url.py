@@ -26,7 +26,7 @@ def application(env, start_response):
     # get input
     request = env['REQUEST_URI']
     # if putting with subfolder
-    if '/i/' in request:
+    if request.startswith('/i/'):
         # start return
         start_response('200 OK', [('Content-Type','text/plain')])
 
@@ -39,7 +39,7 @@ def application(env, start_response):
         return getURLBase(env)+'/o/'+code
 
     # if putting no subfolder
-    elif '/in/' in request:
+    elif request.startswith('/in/'):
         # start return
         start_response('200 OK', [('Content-Type','text/plain')])
 
@@ -52,7 +52,7 @@ def application(env, start_response):
         return getURLBase(env)+'/'+code
     
     # if getting subfolder
-    elif '/o/' in request:
+    elif request.startswith('/o/'):
 
         url = getURL(request[3:],env)
 
